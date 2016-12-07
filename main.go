@@ -32,6 +32,11 @@ func main() {
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	runTime := time.Since(start)
+	if err != nil {
+		if _, ok := err.(*exec.ExitError); !ok {
+			fmt.Printf("%v\n", err)
+		}
+	}
 	fmt.Printf("\nreal\t%s\n", timeString(runTime))
 	if cmd.ProcessState != nil {
 		fmt.Printf("user\t%s\n", timeString(cmd.ProcessState.UserTime()))
