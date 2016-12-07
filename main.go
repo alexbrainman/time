@@ -13,6 +13,12 @@ import (
 	"time"
 )
 
+func timeString(d time.Duration) string {
+	min := int64(d.Minutes())
+	sec := d.Seconds() - float64(60*min)
+	return fmt.Sprintf("%dm%.3fs", min, sec)
+}
+
 // TODO: need to handle signals
 
 func main() {
@@ -25,10 +31,12 @@ func main() {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
-	d := time.Since(start)
-	min := int64(d.Minutes())
-	sec := d.Seconds() - float64(60*min)
-	fmt.Printf("\nreal\t%dm%.3fs\n", min, sec)
+	runTime := time.Since(start)
+	fmt.Printf("\nreal\t%s\n", timeString(runTime))
+	if cmd.ProcessState != nil {
+		fmt.Printf("user\t%s\n", timeString(cmd.ProcessState.UserTime()))
+		fmt.Printf("sys\t%s\n", timeString(cmd.ProcessState.SystemTime()))
+	}
 	if exiterr, ok := err.(*exec.ExitError); ok {
 		if status, ok := exiterr.Sys().(syscall.WaitStatus); ok {
 			os.Exit(status.ExitStatus())
